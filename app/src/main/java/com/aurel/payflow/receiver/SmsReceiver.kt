@@ -5,22 +5,23 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
-import com.aurel.payflow.service.SmsForegroundService
 
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (Telephony.Sms.Intents.SMS_RECEIVED_ACTION == intent.action) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+            
             for (sms in messages) {
-                val sender = sms.displayOriginatingAddress
-                val body = sms.displayMessageBody
+                val sender = sms.displayOriginatingAddress ?: "Inconnu"
+                val body = sms.displayMessageBody ?: ""
                 val timestamp = sms.timestampMillis
 
-                Log.d("Payflow", "SMS reçu de $sender : $body")
+                Log.d("Payflow", "📩 SMS reçu → De: $sender | Message: $body")
 
-                // On va notifier le service
-                val serviceIntent = Intent(context, SmsForegroundService::class.java).apply {
+                // Transmission au service
+                val serviceIntent = Intent(context, com.aurel.payflow.service.SmsForegroundService::class.java).apply {
+                    putExtra("action", "NEW_SMS")
                     putExtra("sender", sender)
                     putExtra("body", body)
                     putExtra("timestamp", timestamp)
