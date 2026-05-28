@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.util.Log
 
 class SmsForegroundService : Service() {
 
@@ -18,11 +19,21 @@ class SmsForegroundService : Service() {
         super.onCreate()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
+        Log.d("Payflow", "🚀 Service Payflow démarré en foreground")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Le service tourne en permanence
-        return START_STICKY  // Important : redémarre automatiquement si tué
+        intent?.let {
+            if (it.getStringExtra("action") == "NEW_SMS") {
+                val sender = it.getStringExtra("sender") ?: "Inconnu"
+                val body = it.getStringExtra("body") ?: ""
+                
+                Log.d("Payflow", "📤 SMS traité → De: $sender | Message: $body")
+                
+                // Pour l'instant on affiche juste (on ajoutera le vrai routage plus tard)
+            }
+        }
+        return START_STICKY
     }
 
     private fun createNotificationChannel() {
@@ -32,7 +43,7 @@ class SmsForegroundService : Service() {
                 "Payflow SMS Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Service de forwarding SMS"
+                description = "Service de surveillance des SMS"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
@@ -43,7 +54,7 @@ class SmsForegroundService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Payflow actif")
             .setContentText("Surveillance des SMS en cours...")
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // À remplacer plus tard par une icône propre
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()
