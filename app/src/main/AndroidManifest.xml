@@ -13,10 +13,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Payflow"
         android:theme="@style/Theme.Payflow">
-        
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
