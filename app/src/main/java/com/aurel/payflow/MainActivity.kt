@@ -1,78 +1,102 @@
-package com.aurel.payflow
+﻿package com.aurel.payflow
 
-import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.aurel.payflow.ui.PayflowMainScreen
 
 class MainActivity : ComponentActivity() {
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val smsReceivedGranted = permissions[Manifest.permission.RECEIVE_SMS] ?: false
+        val smsReadGranted = permissions[Manifest.permission.READ_SMS] ?: false
+        val notificationsGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+        } else {
+            true
+        }
+        
+        if (smsReceivedGranted && smsReadGranted && notificationsGranted) {
+            Log.d("Payflow", "Toutes les permissions ont ete accordees")
+        } else {
+            Log.w("Payflow", "Certaines permissions ont ete refusees")
+        }
+        
+        setContent {
+            PayflowAppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    PayflowMainScreen(
+                        onRequestPermissions = { checkAndRequestPermissions() }
+                    )
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContent {
-            PayflowScreen(this)
+            PayflowAppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    PayflowMainScreen(
+                        onRequestPermissions = { checkAndRequestPermissions() }
+                    )
+                }
+            }
+        }
+
+        checkAndRequestPermissions()
+    }
+
+    private fun checkAndRequestPermissions() {
+        val permissionsNeeded = mutableListOf<String>()
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.RECEIVE_SMS)
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.READ_SMS)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            requestPermissionLauncher.launch(permissionsNeeded.toTypedArray())
         }
     }
 }
 
 @Composable
-fun PayflowScreen(activity: MainActivity) {
-    var logs by remember { mutableStateOf("🚀 Payflow démarré\n====================\n") }
-
-    fun addLog(message: String) {
-        logs += "[${java.time.LocalTime.now()}] $message\n"
-    }
-
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text("Payflow", style = MaterialTheme.typography.headlineLarge)
-
-                Button(onClick = {
-                    val intent = Intent(activity, SmsForegroundService::class.java)
-                    activity.startForegroundService(intent)
-                    addLog("✅ Service démarré manuellement")
-                }) {
-                    Text("▶️ Démarrer le Service")
-                }
-
-                Button(onClick = {
-                    addLog("🔄 Sync delta des SMS manqués forcée")
-                    // On implémentera plus tard
-                }) {
-                    Text("🔄 Forcer Sync Delta")
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Logs en temps réel :", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = logs,
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-
-                Text("Appuyez sur Démarrer le Service pour tester", 
-                     style = MaterialTheme.typography.bodySmall)
-            }
-        }
-    }
+fun PayflowAppTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = androidx.compose.ui.graphics.Color(0xFF1A56DB),
+            background = androidx.compose.ui.graphics.Color(0xFFF3F4F6)
+        ),
+        content = content
+    )
 }
