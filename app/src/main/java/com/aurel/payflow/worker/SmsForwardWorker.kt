@@ -1,4 +1,4 @@
-﻿package com.aurel.payflow.worker
+package com.aurel.payflow.worker
 
 import android.content.Context
 import android.util.Log

@@ -1,4 +1,4 @@
-﻿package com.aurel.payflow.data
+package com.aurel.payflow.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

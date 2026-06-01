@@ -1,4 +1,4 @@
-﻿name: Build Payflow APK
+name: Build Payflow APK
 
 on:
   push:

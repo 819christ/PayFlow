@@ -1,4 +1,4 @@
-﻿package com.aurel.payflow
+package com.aurel.payflow
 
 import android.Manifest
 import android.content.pm.PackageManager

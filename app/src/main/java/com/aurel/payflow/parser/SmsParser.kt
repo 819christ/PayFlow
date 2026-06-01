@@ -1,4 +1,4 @@
-﻿package com.aurel.payflow.parser
+package com.aurel.payflow.parser
 
 import java.text.Normalizer
 import java.util.regex.Pattern

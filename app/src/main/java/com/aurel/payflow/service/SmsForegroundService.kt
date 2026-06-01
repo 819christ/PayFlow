@@ -1,4 +1,4 @@
-﻿package com.aurel.payflow.service
+package com.aurel.payflow.service
 
 import android.Manifest
 import android.app.Notification
