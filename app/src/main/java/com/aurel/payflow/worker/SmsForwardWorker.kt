@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.aurel.payflow.PayflowApp
+import com.aurel.payflow.data.HistoryEntry
 import com.aurel.payflow.data.QueueStatus
+import com.aurel.payflow.data.RoutingRule
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -86,7 +88,7 @@ class SmsForwardWorker(
                     }
                 }
             } catch (e: Exception) {
-                Log.e("Payflow", "Erreur reseau lors de l'envoi du SMS", e)
+                Log.e("Payflow", "Erreur réseau lors de l'envoi du SMS", e)
                 val updated = entry.copy(errorMessage = e.message ?: "Erreur de connexion")
                 historyDao.update(updated)
                 hasTemporaryError = true
