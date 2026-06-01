@@ -9,18 +9,10 @@ android {
     namespace = "com.aurel.payflow"
     compileSdk = 35
 
-
-    // 👇 AJOUTE CES DEUX LIGNES ICI POUR VOIR LE PROBLÈME DANS GITHUB ACTIONS
-    aaptOptions {
-        textSymbolsOnModulesByPackage = true
+    // Ajoute ceci tout à la fin de ton fichier app/build.gradle.kts
+    tasks.withType<com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask>().configureEach {
+        logging.captureStandardOutput(LogLevel.INFO)
     }
-    // Optionnel : Force Gradle à afficher toutes les erreurs de ressource en détail
-    gradle.projectsEvaluated {
-        tasks.withType<com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask> {
-            logging.level = LogLevel.INFO
-        }
-    }
-
 
     defaultConfig {
         applicationId = "com.aurel.payflow"
